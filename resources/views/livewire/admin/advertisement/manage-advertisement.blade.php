@@ -22,7 +22,7 @@ class="">
                         circle 
                         {{-- src="{{ asset('storage/' . auth()->user()->profile_image) }}"  --}}
                         src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}"
-                        class="overflow-hidden"
+                        class=" overflow-hidden"
                         />
                 @else
                     <flux:avatar

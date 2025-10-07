@@ -20,7 +20,7 @@
                         circle 
                         {{-- src="{{ asset('storage/' . auth()->user()->profile_image) }}"  --}}
                         src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}"
-                        class="overflow-hidden"
+                        class="size-12 rounded-full overflow-hidden object-cover"
                         />
                 @else
                     <flux:avatar
@@ -337,7 +337,7 @@
                                                     {{-- avatar="{{ asset('storage/' . $comment->user->profile_image) }}" --}}
                                                     src="{{ Storage::disk('digitalocean')->url($comment->user->profile_image) }}"
                                                     icon:trailing="chevrons-up-down"
-                                                    class="size-8 rounded-full"
+                                                    class="size-8 rounded-full overflow-hidden"
                                                 />
                                                 @else
                                                     <flux:avatar
@@ -383,7 +383,7 @@
                                                     {{-- avatar="{{ asset('storage/' . $comment->user->profile_image) }}" --}}
                                                     src="{{ Storage::disk('digitalocean')->url($comment->user->profile_image) }}"
                                                     icon:trailing="chevrons-up-down"
-                                                    class="size-8 rounded-full"
+                                                    class="size-8 rounded-full overflow-hidden"
                                                 />
                                                 @else
                                                     <flux:avatar
@@ -391,7 +391,7 @@
                                                         
                                                         :initials="$comment->user->initials()"
                                                         icon:trailing="chevrons-up-down"
-                                                        class="size-8 rounded-full"
+                                                        class="size-8 rounded-full overflow-hidden"
                                                     />
                                                 @endif
                                                     <div>
