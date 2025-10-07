@@ -216,7 +216,7 @@ class="!text-black dark:!text-white data-[current]:!bg-red-900 data-[current]:!t
                                     >
                                         @if(auth()->user()->profile_image)
                                         {{-- <img src="{{asset('storage/' . auth()->user()->profile_image)}}" alt=""> --}}
-                                        <img src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}" alt="" class="w-8 h-8 rounded-full overflow-hidden object-cover">
+                                        <img src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}" alt="" class="w-8 h-8 overflow-hidden object-cover">
                                         
                                         @else
                                         {{ auth()->user()->initials() }}

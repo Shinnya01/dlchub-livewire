@@ -304,15 +304,15 @@ public function removeMember($id)
         if (!$this->selectedGroup || trim($this->messageInput) === '') {
             return;
         }
-
+        
         $message = $this->selectedGroup->messages()->create([
             'user_id' => Auth::id(),
             'message' => $this->messageInput,
         ]);
-
+        
         $this->messages[] = $message->load('user');
         
-        $this->messageInput = '';
+        $this->reset('messageInput');
         
         broadcast(new GroupMessageSent($message));
         $this->dispatch('scroll-to-bottom');
@@ -321,6 +321,7 @@ public function removeMember($id)
 #[On('message-received')]
 public function handleRealtimeMessage()
 {
+    
     $this->loadMessages();
     $this->dispatch('message-received');
 }
