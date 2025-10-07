@@ -187,13 +187,12 @@ class="!text-black dark:!text-white data-[current]:!bg-red-900 data-[current]:!t
             <flux:dropdown class="hidden lg:block" position="bottom" align="start" >
                 @if (auth()->user()->profile_image)
                 <flux:profile
-                circle
                     :name="auth()->user()->name"
-                    {{-- avatar="{{ asset('storage/' . auth()->user()->profile_image) }}" --}}
                     avatar="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}"
                     icon:trailing="chevrons-up-down"
-                    class="w-8 h-8 rounded-full overflow-hidden object-cover"
+                    class="size-8 rounded-full overflow-hidden object-cover"
                 />
+
                 @else
                     <flux:profile
                     circle
@@ -217,7 +216,7 @@ class="!text-black dark:!text-white data-[current]:!bg-red-900 data-[current]:!t
                                     >
                                         @if(auth()->user()->profile_image)
                                         {{-- <img src="{{asset('storage/' . auth()->user()->profile_image)}}" alt=""> --}}
-                                        <img src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}" alt="">
+                                        <img src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}" alt="" class="w-8 h-8 rounded-full overflow-hidden object-cover">
                                         
                                         @else
                                         {{ auth()->user()->initials() }}
@@ -266,6 +265,7 @@ class="!text-black dark:!text-white data-[current]:!bg-red-900 data-[current]:!t
                     {{-- avatar="{{asset('storage/' . auth()->user()->profile_image)}}" --}}
                     avatar="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}"
                     icon-trailing="chevron-down"
+                    class="size-8 rounded-full overflow-hidden object-cover"
                 />
                 @else
                 <flux:profile
@@ -285,7 +285,7 @@ class="!text-black dark:!text-white data-[current]:!bg-red-900 data-[current]:!t
                                     >
                                         @if(auth()->user()->profile_image)
                                         {{-- <img src="{{asset('storage/' . auth()->user()->profile_image)}}" alt=""> --}}
-                                        <img src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}" alt="">
+                                        <img src="{{ Storage::disk('digitalocean')->url(auth()->user()->profile_image) }}" alt="" class="w-8 h-8 rounded-full overflow-hidden object-cover">
                                         @else
                                         {{ auth()->user()->initials() }}
                                         @endif
