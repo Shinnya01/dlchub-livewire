@@ -250,7 +250,15 @@
                     <div class="border-t border-gray-200 dark:border-gray-700 p-4">
                         <form wire:submit="sendMessage" class="flex items-center gap-2" wire:loading.class="opacity-50" wire:loading.attr="disabled">
                             <flux:input wire:model="messageInput" placeholder="Type your message..." class="flex-1" autocomplete="off"/>
-                            <flux:button type="submit" icon="arrow-right" class="size-10" />
+                            <flux:button type="submit" class="size-10" >
+                                <div wire:loading.remove wire:target="sendMessage">
+                                    <flux:icon.arrow-right class="size-4"/>
+                                </div>
+                                <div wire:loading wire:target="sendMessage">
+                                    <flux:icon.loading class="size-4"/>
+                                </div>
+                            </flux:button>
+                            
                         </form>
                     </div>
             </div>
