@@ -1,45 +1,76 @@
-# PHP-FPM Dockerfile (app + supervisor). Adjust as needed.
-FROM php:8.2-fpm
+# Multi-stage Dockerfile: builds composer deps and frontend, final image runs nginx + php-fpm under supervisord
+# Final image listens on port 8080 (DigitalOcean App Platform uses this)
 
-# Install system deps for building and runtime (keep image small)
+# ---------- STAGE 1: PHP deps ----------
+FROM php:8.2-fpm AS php-base
+
+# Install system deps and php extensions required by Laravel
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       git curl ca-certificates libzip-dev zip unzip libpng-dev libonig-dev libxml2-dev supervisor \
-       build-essential libpng-dev libjpeg-dev libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd \
-    && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends \
+       git curl ca-certificates unzip libzip-dev zip libpng-dev libonig-dev libxml2-dev \
+       libjpeg-dev libfreetype6-dev \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd \
+  && rm -rf /var/lib/apt/lists/*
 
-# Composer (copy from official composer image)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install composer (official)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy composer files early for layer caching
+COPY composer.json composer.lock ./
+
+# Install PHP deps (production)
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-progress \
+  && rm -rf /root/.composer/cache
+
+# Copy application code
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+# Run artisan optimizations (optional here, can be run on release)
+RUN php artisan config:cache || true
 
-# Node build: install, build, then remove build deps
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get update && apt-get install -y nodejs \
-    && npm install --silent \
-    && npm run build \
-    && apt-get remove -y nodejs build-essential \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* /root/.npm /root/.cache
+# ---------- STAGE 2: Node build for assets ----------
+FROM node:22-alpine AS node-build
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --silent
+# Copy only the frontend sources the build needs. Adjust path if using vite/webpack
+COPY . .
+RUN npm run build
 
-# Ensure permissions for storage and cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# ---------- STAGE 3: Final runtime with nginx + php-fpm ----------
+FROM php:8.2-fpm
 
-# Supervisor config + entrypoint
+# Install runtime deps, nginx and supervisor
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends nginx supervisor \
+  && rm -rf /var/lib/apt/lists/*
+
+# Create web user and directories
+RUN mkdir -p /var/www/html \
+  && chown -R www-data:www-data /var/www/html /var/lib/nginx
+
+WORKDIR /var/www/html
+
+# Copy PHP vendor + app from php-base
+COPY --from=php-base /var/www/html /var/www/html
+
+# Copy built frontend from node-build (adjust path to where your build outputs)
+COPY --from=node-build /app/public /var/www/html/public
+
+# Copy supervisor + nginx configs
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Expose PHP-FPM port for internal networking
-EXPOSE 9000
+# Ensure storage directories exist and are writable
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+  && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+EXPOSE 8080
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

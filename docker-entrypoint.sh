@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
 
-# If the app has artisan, optionally run migrations here.
-# Recommendation: run migrations via DigitalOcean release command or manually.
-if [ -f /var/www/html/artisan ]; then
-  echo "Setting permissions..."
-  chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-fi
+# Ensure app files have correct ownership
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
 
-# Execute the container CMD (supervisord)
+# If artisan exists and migrations should be run here, do it via run command instead of at build time.
+# Example production-safe steps (uncomment if you want them to run automatically):
+# php artisan migrate --force
+# php artisan config:cache
+# php artisan route:cache
+# php artisan view:cache
+
 exec "$@"
