@@ -4,9 +4,9 @@ use Livewire\Volt\Volt;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-Storage::fake('public');
 
-$photo = UploadedFile::fake()->image('avatar.jpg');
+
+
 
 test('registration screen can be rendered', function () {
     $response = $this->get('/register');
@@ -15,6 +15,8 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register', function () {
+    Storage::fake('public');
+    $photo = UploadedFile::fake()->image('avatar.jpg');
     $response = Volt::test('auth.register')
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
