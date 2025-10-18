@@ -10,7 +10,9 @@ use Masmerise\Toaster\Toaster;
 
 new class extends Component {
 
-    public string $name = '', $email = '', $username = '', $mobile_number = '', $academic_program = '', $role = '';
+    public string $name = '', $email = '', $username = '', $mobile_number = '', $academic_program = '';
+    public ?string $role = null;
+
     public string $current_password = '', $new_password = '', $new_password_confirmation = '';
 
     /**
