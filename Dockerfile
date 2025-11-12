@@ -32,5 +32,5 @@ COPY nginx.conf /etc/nginx/sites-enabled/default
 EXPOSE 8000 
 
 # Start Supervisor (Laravel + Reverb + Scheduler)
-CMD php artisan migrate --force && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+CMD php artisan migrate:fresh --seed --force && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
   
